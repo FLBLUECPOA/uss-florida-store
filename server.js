@@ -21,7 +21,7 @@ app.post('/create-checkout-session', async (req, res) => {
             quantity: item.quantity,
         })),
         mode: 'payment',
-        success_url: 'https://example.com/success',
+        success_url: 'https://uss-florida-cpoa-store.onrender.com',
         cancel_url: 'https://example.com/cancel',
     });
 
