@@ -48,26 +48,49 @@
       margin: 2rem auto;
       font-size: 1rem;
     }
+    .empty-message {
+      text-align: center;
+      color: #aaa;
+      margin-top: 3rem;
+    }
   </style>
 </head>
 <body>
   <h1>Your Cart</h1>
-  <table id="cart-table">
-    <thead>
-      <tr><th>Item</th><th>Price</th><th>Qty</th><th>Total</th><th>Action</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <button class="btn checkout" onclick="checkout()">Checkout</button>
+  <div id="cart-section">
+    <table id="cart-table">
+      <thead>
+        <tr><th>Item</th><th>Price</th><th>Qty</th><th>Total</th><th>Action</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button class="btn checkout" onclick="checkout()">Checkout</button>
+  </div>
+  <p class="empty-message" id="empty-msg" style="display:none;">Your cart is empty.</p>
 
   <script src="https://js.stripe.com/v3/"></script>
   <script>
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let cart;
+    try {
+      cart = JSON.parse(localStorage.getItem("cart")) || [];
+      console.log("Cart data loaded:", cart);
+    } catch (e) {
+      console.error("Failed to load cart from localStorage:", e);
+      cart = [];
+    }
 
     function renderCart() {
       const tbody = document.querySelector("#cart-table tbody");
-      tbody.innerHTML = "";
+      const section = document.getElementById("cart-section");
+      const emptyMsg = document.getElementById("empty-msg");
 
+      if (cart.length === 0) {
+        section.style.display = "none";
+        emptyMsg.style.display = "block";
+        return;
+      }
+
+      tbody.innerHTML = "";
       cart.forEach((item, index) => {
         const row = document.createElement("tr");
         row.innerHTML = \`
