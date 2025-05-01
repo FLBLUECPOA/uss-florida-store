@@ -94,14 +94,12 @@
       cart.forEach((item, index) => {
         const row = document.createElement("tr");
         row.innerHTML = \`
-          <td>\${item.name}</td>
-          <td>$\${item.price.toFixed(2)}</td>
-          <td>
-            <input type="number" value="\${item.quantity}" min="1" onchange="updateQuantity(\${index}, this.value)">
-          </td>
-          <td>$\${(item.price * item.quantity).toFixed(2)}</td>
-          <td><button class="remove-btn" onclick="removeItem(\${index})">Remove</button></td>
-        \`;
+          row.innerHTML =
+  "<td>" + item.name + "</td>" +
+  "<td>$" + item.price.toFixed(2) + "</td>" +
+  "<td><input type='number' value='" + item.quantity + "' min='1' onchange='updateQuantity(" + index + ", this.value)'></td>" +
+  "<td>$" + (item.price * item.quantity).toFixed(2) + "</td>" +
+  "<td><button class='remove-btn' onclick='removeItem(" + index + ")'>Remove</button></td>";
         tbody.appendChild(row);
       });
     }
