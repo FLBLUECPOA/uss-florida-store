@@ -22,7 +22,7 @@ app.post('/create-checkout-session', async (req, res) => {
         })),
         mode: 'payment',
         success_url: 'https://uss-florida-cpoa-store.onrender.com',
-        cancel_url: 'https://example.com/cancel',
+        cancel_url: 'https://uss-florida-cpoa-store.onrender.com'',
     });
 
     res.json({ id: session.id });
