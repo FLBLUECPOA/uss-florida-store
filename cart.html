@@ -123,26 +123,29 @@ const stripe = Stripe("pk_live_51RJjHjBtclYiVD2RdjKxONwP2kXcBdYjeRhn6bY4k4deSfLz
   }
 
   function checkout() {
-    if (cart.length === 0) {
-      alert("Your cart is empty!");
-      return;
-    }
-
-    fetch("/create-checkout-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: cart })
-    })
-    .then((res) => res.json())
-    .then((data) => {
-      return stripe.redirectToCheckout({ sessionId: data.id });
-    })
-    .then((result) => {
-      if (result.error) alert(result.error.message);
-    })
-    .catch(err => console.error("Checkout failed:", err));
+  if (cart.length === 0) {
+    alert("Your cart is empty!");
+    return;
   }
 
+  fetch("/create-checkout-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items: cart })
+  })
+  .then(res => res.json())
+  .then(data => {
+    // THIS is Step 3:
+    return stripe.redirectToCheckout({ sessionId: data.id });
+  })
+  .then(result => {
+    if (result.error) alert(result.error.message);
+  })
+  .catch(err => {
+    console.error("Checkout failed:", err);
+    alert("Something went wrong during checkout.");
+  });
+}
   window.updateQuantity = updateQuantity;
   window.removeItem = removeItem;
   window.checkout = checkout;
