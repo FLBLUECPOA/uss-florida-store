@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Cart</title>
+  <style>
+    body {
+      background-color: #2c2c2c;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+    }
+    h1 {
+      color: gold;
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      margin-top: 2rem;
+      border-collapse: collapse;
+      color: white;
+    }
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #555;
+    }
+    th {
+      color: gold;
+    }
+    input[type='number'] {
+      width: 60px;
+      padding: 0.25rem;
+    }
+    .btn, .remove-btn {
+      padding: 0.5rem 1rem;
+      background-color: #b3001b;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .remove-btn {
+      background-color: #a00;
+    }
+    .btn.checkout {
+      display: block;
+      margin: 2rem auto;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Your Cart</h1>
+  <table id="cart-table">
+    <thead>
+      <tr><th>Item</th><th>Price</th><th>Qty</th><th>Total</th><th>Action</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <button class="btn checkout" onclick="checkout()">Checkout</button>
+
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    function renderCart() {
+      const tbody = document.querySelector("#cart-table tbody");
+      tbody.innerHTML = "";
+
+      cart.forEach((item, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = \`
+          <td>\${item.name}</td>
+          <td>$\${item.price.toFixed(2)}</td>
+          <td>
+            <input type="number" value="\${item.quantity}" min="1" onchange="updateQuantity(\${index}, this.value)">
+          </td>
+          <td>$\${(item.price * item.quantity).toFixed(2)}</td>
+          <td><button class="remove-btn" onclick="removeItem(\${index})">Remove</button></td>
+        \`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function updateQuantity(index, newQty) {
+      const qty = parseInt(newQty);
+      if (qty > 0) {
+        cart[index].quantity = qty;
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+      }
+    }
+
+    function removeItem(index) {
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      renderCart();
+    }
+
+    function checkout() {
+      if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+      }
+
+      fetch("/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: cart }),
+      })
+      .then((res) => res.json())
+      .then((data) => {
+        return stripe.redirectToCheckout({ sessionId: data.id });
+      })
+      .then((result) => {
+        if (result.error) alert(result.error.message);
+      });
+    }
+
+    renderCart();
+  </script>
+</body>
+</html>

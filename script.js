@@ -1,7 +1,7 @@
-let cart = [];
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
 document.querySelectorAll(".product button").forEach((btn) => {
-  btn.addEventListener("click", (e) => {
+  btn.addEventListener("click", () => {
     const product = btn.closest(".product");
     const name = product.getAttribute("data-name");
     const price = parseFloat(product.getAttribute("data-price"));
@@ -13,6 +13,7 @@ document.querySelectorAll(".product button").forEach((btn) => {
       cart.push({ name, price, quantity: 1 });
     }
 
+    localStorage.setItem("cart", JSON.stringify(cart));
     updateCartCount();
   });
 });
@@ -21,24 +22,3 @@ function updateCartCount() {
   const count = cart.reduce((sum, item) => sum + item.quantity, 0);
   document.getElementById("cart-count").innerText = count;
 }
-
-function checkout() {
-  if (cart.length === 0) {
-    alert("Your cart is empty!");
-    return;
-  }
-
-  fetch("/create-checkout-session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ items: cart }),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      return stripe.redirectToCheckout({ sessionId: data.id });
-    })
-    .then((result) => {
-      if (result.error) alert(result.error.message);
-    });
-}
-
