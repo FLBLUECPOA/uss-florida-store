@@ -1,30 +1,44 @@
+let cart = [];
 
-let cartCount = 0;
+document.querySelectorAll(".product button").forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    const product = btn.closest(".product");
+    const name = product.getAttribute("data-name");
+    const price = parseFloat(product.getAttribute("data-price"));
 
-document.querySelectorAll("button").forEach(btn => {
-    btn.addEventListener("click", () => {
-        cartCount++;
-        document.getElementById("cart-count").innerText = cartCount;
-    });
+    const existing = cart.find((item) => item.name === name);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ name, price, quantity: 1 });
+    }
+
+    updateCartCount();
+  });
 });
 
-function checkout() {
-    const items = [
-        { name: "Chiefs Coin", price: 20, quantity: 1 },
-        { name: "Chiefs Shirt", price: 25, quantity: 1 },
-        { name: "Chiefs Buckle", price: 30, quantity: 1 }
-    ];
+function updateCartCount() {
+  const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+  document.getElementById("cart-count").innerText = count;
+}
 
-    fetch('/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items })
+function checkout() {
+  if (cart.length === 0) {
+    alert("Your cart is empty!");
+    return;
+  }
+
+  fetch("/create-checkout-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items: cart }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      return stripe.redirectToCheckout({ sessionId: data.id });
     })
-    .then(res => res.json())
-    .then(data => {
-        return stripe.redirectToCheckout({ sessionId: data.id });
-    })
-    .then(result => {
-        if (result.error) alert(result.error.message);
+    .then((result) => {
+      if (result.error) alert(result.error.message);
     });
 }
+
